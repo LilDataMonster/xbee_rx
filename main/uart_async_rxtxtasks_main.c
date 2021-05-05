@@ -13,8 +13,9 @@
 #include "driver/uart.h"
 #include "string.h"
 #include "driver/gpio.h"
+#include <stdio.h>
 
-static const int RX_BUF_SIZE = 1024;
+static const int RX_BUF_SIZE = 2048;
 
 #define TXD_PIN (GPIO_NUM_17)
 #define RXD_PIN (GPIO_NUM_16)
@@ -60,11 +61,13 @@ static void rx_task(void *arg)
     esp_log_level_set(RX_TASK_TAG, ESP_LOG_INFO);
     uint8_t* data = (uint8_t*) malloc(RX_BUF_SIZE*4+1);
     while (1) {
-        const int rxBytes = uart_read_bytes(UART_NUM_1, data, RX_BUF_SIZE*4, 1000 / portTICK_RATE_MS);
+        int length = 0;
+        const int rxBytes = uart_read_bytes(UART_NUM_1, data, RX_BUF_SIZE*4, 100 / portTICK_RATE_MS);
         if (rxBytes > 0) {
             data[rxBytes] = 0;
-            ESP_LOGI(RX_TASK_TAG, "Read %d bytes: '%s'", rxBytes, data);
-            ESP_LOG_BUFFER_HEXDUMP(RX_TASK_TAG, data, rxBytes, ESP_LOG_INFO);
+            ESP_LOGI(RX_TASK_TAG, "%s", data);
+            //printf("%s\n", data);
+            //ESP_LOG_BUFFER_HEXDUMP(RX_TASK_TAG, data, rxBytes, ESP_LOG_INFO);
         }
     }
     free(data);
